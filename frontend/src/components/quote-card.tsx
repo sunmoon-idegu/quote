@@ -125,7 +125,7 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
       </div>
 
       {/* Quote text */}
-      <blockquote className={`text-3xl leading-relaxed whitespace-pre-wrap text-foreground font-[350] ${isChinese ? "font-[family-name:var(--font-noto-serif-sc)]" : "font-[family-name:var(--font-geist-sans)]"}`}>
+      <blockquote className={`text-xl sm:text-2xl md:text-3xl leading-relaxed whitespace-pre-wrap text-foreground font-[350] ${isChinese ? "font-[family-name:var(--font-noto-serif-sc)]" : "font-[family-name:var(--font-geist-sans)]"}`}>
         {quote.text}
       </blockquote>
 
