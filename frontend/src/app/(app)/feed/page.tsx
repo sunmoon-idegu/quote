@@ -62,7 +62,7 @@ export default function FeedPage() {
   if (loading) {
     return (
       <div className="-my-8 h-[calc(100vh-56px)] flex items-center justify-center">
-        <div className="w-full max-w-2xl space-y-4 animate-pulse px-4">
+        <div className="w-full max-w space-y-4 animate-pulse px-4">
           <div className="h-8 bg-neutral-100 dark:bg-neutral-800 rounded w-4/5" />
           <div className="h-8 bg-neutral-100 dark:bg-neutral-800 rounded w-3/5" />
           <div className="h-4 bg-neutral-100 dark:bg-neutral-800 rounded w-1/4 mt-6" />
@@ -84,7 +84,7 @@ export default function FeedPage() {
   return (
     <div className="-my-8 h-[calc(100vh-56px)] flex items-center justify-center px-4">
       {/* Card + right arrow */}
-      <div className="relative w-full max-w-2xl">
+      <div className="relative w-full max-w-3xl">
         <div key={index} className="relative rounded-2xl border border-transparent px-10 py-12 animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
           <QuoteCard
             quote={quote}

@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-geist-sans" });
-const notoSerifSC = Noto_Serif_SC({ subsets: ["chinese-simplified"], weight: ["300", "400"], variable: "--font-noto-serif-sc" });
+const notoSerifSC = Noto_Serif_SC({ subsets: ["latin"], weight: ["300", "400"], variable: "--font-noto-serif-sc" });
 
 export const metadata: Metadata = {
   title: {

@@ -8,9 +8,10 @@ import { UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "./theme-toggle";
 import { SearchModal } from "./search-modal";
 import { Button } from "@/components/ui/button";
+import { GleaningIcon } from "@/components/gleaning-icon";
 
 const links = [
-  { href: "/", label: "Feed", icon: List },
+  { href: "/feed", label: "Feed", icon: List },
   { href: "/shelf", label: "Shelf", icon: BookOpen },
 ];
 
@@ -37,10 +38,10 @@ export function Nav() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/favicon.svg" alt="Gleaning" width={24} height={24} className="rounded-md" />
+          <Link href="/feed" className="flex items-center gap-2">
+            <GleaningIcon size={24} />
             <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100 tracking-tight">Gleaning</span>
           </Link>
 
