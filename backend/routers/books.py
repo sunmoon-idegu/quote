@@ -51,7 +51,7 @@ def get_book(
 
     raw_quotes = (
         db.query(Quote)
-        .options(joinedload(Quote.source), joinedload(Quote.tags))
+        .options(joinedload(Quote.source).joinedload(Source.book), joinedload(Quote.tags))
         .join(Source, Quote.source_id == Source.id)
         .filter(Quote.user_id == current_user.id, Source.book_id == book_id)
         .order_by(Quote.page.nullslast(), Quote.created_at)

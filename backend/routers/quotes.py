@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from auth import verify_token
 from database import get_db
-from models import Quote, QuoteTag, Source, Tag, User
+from models import Quote, QuoteTag, Source, Tag, User, Book
 from schemas import QuoteCreate, QuoteOut, QuoteUpdate, SourceOut, TagOut
 
 router = APIRouter(prefix="/quotes", tags=["quotes"])
@@ -31,7 +31,7 @@ def _set_tags(quote: Quote, tag_ids: Optional[List[UUID]], db: Session):
 def _own_quote_or_404(quote_id: UUID, user: User, db: Session) -> Quote:
     q = (
         db.query(Quote)
-        .options(joinedload(Quote.source), joinedload(Quote.tags))
+        .options(joinedload(Quote.source).joinedload(Source.book), joinedload(Quote.tags))
         .filter(Quote.id == quote_id, Quote.user_id == user.id)
         .first()
     )
@@ -47,7 +47,7 @@ def list_quotes(
 ):
     quotes = (
         db.query(Quote)
-        .options(joinedload(Quote.source), joinedload(Quote.tags))
+        .options(joinedload(Quote.source).joinedload(Source.book), joinedload(Quote.tags))
         .filter(Quote.user_id == current_user.id)
         .order_by(Quote.created_at.desc())
         .all()

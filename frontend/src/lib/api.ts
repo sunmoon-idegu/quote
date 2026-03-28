@@ -61,6 +61,7 @@ export interface Source {
   url: string | null;
   context: string | null;
   book_id: string | null;
+  book: Book | null;
   created_at: string;
 }
 

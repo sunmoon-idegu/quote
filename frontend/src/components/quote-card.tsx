@@ -34,8 +34,8 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
 
   const s = quote.source;
   const SourceIcon = s ? sourceIcons[s.type] : null;
-  const title = s?.title ?? null;
-  const author = s?.author ?? quote.author ?? null;
+  const title = s?.title ?? s?.book?.title ?? null;
+  const author = s?.author ?? s?.book?.author ?? quote.author ?? null;
   const page = s?.type === "book" && quote.page ? `p. ${quote.page}` : null;
 
   // ── delete ───────────────────────────────────────────────────────────────
@@ -128,7 +128,7 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
         {quote.text}
       </blockquote>
 
-      {/* Footer: source + tags */}
+      {/* Footer: source + tags + date */}
       <footer className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
         {(title || author || page) && (
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -145,6 +145,9 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
             {t.name}
           </span>
         ))}
+        <span className="text-xs text-muted-foreground/50 ml-auto">
+          {new Date(quote.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+        </span>
       </footer>
 
       {/* ── Delete confirm dialog ── */}

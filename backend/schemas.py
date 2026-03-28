@@ -53,6 +53,7 @@ class SourceOut(BaseModel):
     url: Optional[str]
     context: Optional[str]
     book_id: Optional[UUID]
+    book: Optional[BookOut] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

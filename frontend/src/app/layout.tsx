@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Lora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const lora = Lora({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +22,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning className={geist.variable}>
+      <html lang="en" suppressHydrationWarning className={lora.variable}>
         <body className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans antialiased">
           <ThemeProvider>{children}</ThemeProvider>
         </body>

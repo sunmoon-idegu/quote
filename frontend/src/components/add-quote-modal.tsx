@@ -46,6 +46,7 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
   const [newBookAuthor, setNewBookAuthor] = useState("");
   const [newBookLanguage, setNewBookLanguage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [creatingBook, setCreatingBook] = useState(false);
 
   // Reset and load books when dialog opens
   useEffect(() => {
@@ -88,21 +89,26 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
   }
 
   async function handleCreateBook() {
-    if (!newBookTitle.trim()) return;
-    const token = await waitForToken(getToken);
-    const book = await apiFetch<Book>("/books", token, {
-      method: "POST",
-      body: JSON.stringify({ title: newBookTitle.trim(), author: newBookAuthor.trim() || null, language: newBookLanguage || null }),
-    });
-    setBooks((b) => [...b, book]);
-    setBookId(book.id);
-    setBookSearch(book.title);
-    setShowNewBook(false);
-    setNewBookTitle(""); setNewBookAuthor(""); setNewBookLanguage("");
+    if (!newBookTitle.trim() || creatingBook) return;
+    setCreatingBook(true);
+    try {
+      const token = await waitForToken(getToken);
+      const book = await apiFetch<Book>("/books", token, {
+        method: "POST",
+        body: JSON.stringify({ title: newBookTitle.trim(), author: newBookAuthor.trim() || null, language: newBookLanguage || null }),
+      });
+      setBooks((b) => [...b, book]);
+      setBookId(book.id);
+      setBookSearch(book.title);
+      setShowNewBook(false);
+      setNewBookTitle(""); setNewBookAuthor(""); setNewBookLanguage("");
+    } finally {
+      setCreatingBook(false);
+    }
   }
 
   async function handleSubmit() {
-    if (!text.trim()) return;
+    if (!text.trim() || submitting) return;
     setSubmitting(true);
     const token = await waitForToken(getToken);
 
@@ -155,6 +161,7 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
 
     setSubmitting(false);
     onAdded?.(quote);
+    window.dispatchEvent(new CustomEvent("quote-added", { detail: quote }));
     onClose();
   }
 
@@ -176,7 +183,7 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
         </DialogHeader>
 
         <div
-          className="space-y-4 py-1"
+          className="space-y-3 py-1"
           onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSubmit(); }}
         >
           {/* Text */}
@@ -185,30 +192,27 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="The quote…"
-            rows={4}
+            rows={5}
             className="resize-none text-base"
           />
 
-          {/* Source tabs — hidden when pre-filled from book */}
+          {/* Source type pills — hidden when pre-filled from book */}
           {!fromBook && (
-            <div>
-              <label className="text-xs text-muted-foreground uppercase tracking-wide mb-2 block">Source</label>
-              <div className="flex gap-1 flex-wrap">
-                {sourceTypes.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setSourceType(value)}
-                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                      sourceType === value
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+            <div className="flex gap-1 flex-wrap">
+              {sourceTypes.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSourceType(value)}
+                  className={`cursor-pointer px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    sourceType === value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           )}
 
@@ -217,68 +221,90 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
             <div className="space-y-2">
               {!fromBook && !showNewBook && (
                 <>
-                  <div className="relative">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        value={bookSearch}
+                        onChange={(e) => { setBookSearch(e.target.value); setBookId(""); }}
+                        placeholder="Search books…"
+                      />
+                      {bookSearch && !bookId && filteredBooks.length > 0 && (
+                        <ul className="absolute z-10 mt-1 w-full bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+                          {filteredBooks.map((b) => (
+                            <li key={b.id}>
+                              <button
+                                type="button"
+                                onClick={() => { setBookId(b.id); setBookSearch(b.title); }}
+                                className="w-full cursor-pointer text-left px-3 py-1.5 text-sm hover:bg-muted"
+                              >
+                                {b.title}
+                                {b.author && <span className="text-muted-foreground ml-2 text-xs">{b.author}</span>}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                     <Input
-                      value={bookSearch}
-                      onChange={(e) => { setBookSearch(e.target.value); setBookId(""); }}
-                      placeholder="Search books…"
+                      value={page}
+                      onChange={(e) => setPage(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Page"
+                      className="w-20 shrink-0"
+                      inputMode="numeric"
                     />
-                    {bookSearch && !bookId && filteredBooks.length > 0 && (
-                      <ul className="absolute z-10 mt-1 w-full bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
-                        {filteredBooks.map((b) => (
-                          <li key={b.id}>
-                            <button
-                              type="button"
-                              onClick={() => { setBookId(b.id); setBookSearch(b.title); }}
-                              className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
-                            >
-                              {b.title}
-                              {b.author && <span className="text-muted-foreground ml-2 text-xs">{b.author}</span>}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowNewBook(true)}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    className="flex cursor-pointer items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                   >
                     <Plus size={12} /> Add new book
                   </button>
                 </>
               )}
 
+              {fromBook && (
+                <Input
+                  value={page}
+                  onChange={(e) => setPage(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Page (optional)"
+                  inputMode="numeric"
+                />
+              )}
+
               {!fromBook && showNewBook && (
                 <div className="border border-border rounded-lg p-3 space-y-2">
                   <Input value={newBookTitle} onChange={(e) => setNewBookTitle(e.target.value)} placeholder="Book title" autoFocus />
-                  <Input value={newBookAuthor} onChange={(e) => setNewBookAuthor(e.target.value)} placeholder="Author (optional)" />
-                  <LanguageSelect value={newBookLanguage} onValueChange={setNewBookLanguage} />
+                  <div className="flex gap-2">
+                    <Input value={newBookAuthor} onChange={(e) => setNewBookAuthor(e.target.value)} placeholder="Author (optional)" className="flex-1" />
+                    <div className="w-36 shrink-0">
+                      <LanguageSelect value={newBookLanguage} onValueChange={setNewBookLanguage} />
+                    </div>
+                  </div>
                   <div className="flex gap-2 pt-1">
-                    <Button size="sm" onClick={handleCreateBook}>Add book</Button>
+                    <Button size="sm" onClick={handleCreateBook} disabled={!newBookTitle.trim() || creatingBook}>
+                      {creatingBook ? "Adding…" : "Add book"}
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => setShowNewBook(false)}>Cancel</Button>
                   </div>
                 </div>
               )}
-
-              <Input value={page} onChange={(e) => setPage(e.target.value)} placeholder="Page (optional)" type="number" />
             </div>
           )}
 
           {/* Video */}
           {sourceType === "video" && (
-            <div className="space-y-2">
-              <Input value={videoTitle} onChange={(e) => setVideoTitle(e.target.value)} placeholder="Video title" />
-              <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="URL (optional)" type="url" />
+            <div className="flex gap-2">
+              <Input value={videoTitle} onChange={(e) => setVideoTitle(e.target.value)} placeholder="Video title" className="flex-1" />
+              <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="URL (optional)" type="url" className="flex-1" />
             </div>
           )}
 
           {/* Spoken */}
           {sourceType === "spoken" && (
-            <div className="space-y-2">
-              <Input value={spokenSpeaker} onChange={(e) => setSpokenSpeaker(e.target.value)} placeholder="Speaker (optional)" />
-              <Input value={spokenContext} onChange={(e) => setSpokenContext(e.target.value)} placeholder="Context (optional)" />
+            <div className="flex gap-2">
+              <Input value={spokenSpeaker} onChange={(e) => setSpokenSpeaker(e.target.value)} placeholder="Speaker (optional)" className="flex-1" />
+              <Input value={spokenContext} onChange={(e) => setSpokenContext(e.target.value)} placeholder="Context (optional)" className="flex-1" />
             </div>
           )}
 
@@ -289,16 +315,18 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
 
           {/* Tags */}
           <div>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {tags.map((t) => (
-                <span key={t} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                  {t}
-                  <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))}>
-                    <X size={10} />
-                  </button>
-                </span>
-              ))}
-            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {tags.map((t) => (
+                  <span key={t} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    {t}
+                    <button type="button" className="cursor-pointer" onClick={() => setTags(tags.filter((x) => x !== t))}>
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
             <Input
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}

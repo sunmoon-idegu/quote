@@ -47,6 +47,8 @@ class Source(Base):
     book_id = Column(UUID(as_uuid=True), ForeignKey("books.id", ondelete="SET NULL"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    book = relationship("Book", foreign_keys=[book_id], lazy="select")
+
 
 class Quote(Base):
     __tablename__ = "quotes"

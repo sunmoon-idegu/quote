@@ -158,7 +158,7 @@ export default function ShelfPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-semibold">Shelf</h1>
-        <Button size="sm" onClick={() => setShowForm((v) => !v)}>
+        <Button onClick={() => setShowForm((v) => !v)}>
           <Plus size={14} /> Add book
         </Button>
       </div>
