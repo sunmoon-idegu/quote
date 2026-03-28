@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { apiFetch, waitForToken, type BookWithQuotes } from "@/lib/api";
+import { apiFetch, waitForToken, type BookWithQuotes, type Quote } from "@/lib/api";
 import { QuoteCard } from "@/components/quote-card";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
@@ -33,6 +33,17 @@ export default function BookPage() {
       }
     })();
   }, [getToken, bookId]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const quote = (e as CustomEvent).detail as Quote;
+      if (quote.source?.book_id === bookId) {
+        setBook((b) => b ? { ...b, quotes: [...b.quotes, quote] } : b);
+      }
+    };
+    window.addEventListener("quote-added", handler);
+    return () => window.removeEventListener("quote-added", handler);
+  }, [bookId]);
 
   if (loading) {
     return <div className="py-12 text-center text-neutral-400 text-sm animate-pulse">Loading…</div>;
