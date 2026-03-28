@@ -4,18 +4,23 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch, waitForToken, type Quote } from "@/lib/api";
 import { QuoteCard } from "@/components/quote-card";
-import Link from "next/link";
-
-const PAGE_SIZE = 5;
 
 export default function FeedPage() {
   const { getToken } = useAuth();
   const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => { document.title = "Feed · Quote"; }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const quote = (e as CustomEvent).detail as Quote;
+      setQuotes((qs) => [quote, ...qs]);
+    };
+    window.addEventListener("quote-added", handler);
+    return () => window.removeEventListener("quote-added", handler);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -56,38 +61,24 @@ export default function FeedPage() {
   if (quotes.length === 0) {
     return (
       <div className="text-center py-32 text-neutral-400">
-        <p className="text-sm">No quotes yet.</p>
-        <Link href="/add" className="mt-3 inline-block text-sm text-neutral-900 dark:text-neutral-100 underline underline-offset-4">
-          Add your first one
-        </Link>
+        <p className="text-sm">No quotes yet. Press ⌘N to add one.</p>
       </div>
     );
   }
 
-  const shown = quotes.slice(0, visible);
-  const hasMore = visible < quotes.length;
-
   return (
-    <div>
-      {shown.map((q) => (
-        <QuoteCard
-          key={q.id}
-          quote={q}
-          onDeleted={(id) => setQuotes((qs) => qs.filter((x) => x.id !== id))}
-          onUpdated={(updated) => setQuotes((qs) => qs.map((x) => x.id === updated.id ? updated : x))}
-        />
-      ))}
-
-      {hasMore && (
-        <div className="pt-8 pb-4 text-center">
-          <button
-            onClick={() => setVisible((v) => v + PAGE_SIZE)}
-            className="text-sm text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
-          >
-            Load more
-          </button>
+    <div className="-my-8 h-[calc(100vh-56px)] overflow-y-scroll snap-y snap-mandatory">
+      {quotes.map((q) => (
+        <div key={q.id} className="h-[calc(100vh-56px)] snap-start flex items-center px-4">
+          <div className="max-w-3xl mx-auto w-full">
+            <QuoteCard
+              quote={q}
+              onDeleted={(id) => setQuotes((qs) => qs.filter((x) => x.id !== id))}
+              onUpdated={(updated) => setQuotes((qs) => qs.map((x) => x.id === updated.id ? updated : x))}
+            />
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
