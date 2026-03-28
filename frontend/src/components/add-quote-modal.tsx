@@ -165,8 +165,6 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
     onClose();
   }
 
-  const fromBook = !!prefillBookId;
-
   const sourceTypes: { value: SourceType; label: string }[] = [
     { value: "book", label: "Book" },
     { value: "video", label: "Video" },
@@ -196,30 +194,28 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
             className="resize-none text-base"
           />
 
-          {/* Source type pills — hidden when pre-filled from book */}
-          {!fromBook && (
-            <div className="flex gap-1 flex-wrap">
-              {sourceTypes.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSourceType(value)}
-                  className={`cursor-pointer px-3 py-1.5 rounded-full text-sm transition-colors ${
-                    sourceType === value
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Source type pills */}
+          <div className="flex gap-1 flex-wrap">
+            {sourceTypes.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSourceType(value)}
+                className={`cursor-pointer px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  sourceType === value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
           {/* Book */}
           {sourceType === "book" && (
             <div className="space-y-2">
-              {!fromBook && !showNewBook && (
+              {!showNewBook && (
                 <>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
@@ -263,16 +259,7 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
                 </>
               )}
 
-              {fromBook && (
-                <Input
-                  value={page}
-                  onChange={(e) => setPage(e.target.value.replace(/\D/g, ""))}
-                  placeholder="Page (optional)"
-                  inputMode="numeric"
-                />
-              )}
-
-              {!fromBook && showNewBook && (
+              {showNewBook && (
                 <div className="border border-border rounded-lg p-3 space-y-2">
                   <Input value={newBookTitle} onChange={(e) => setNewBookTitle(e.target.value)} placeholder="Book title" autoFocus />
                   <div className="flex gap-2">
