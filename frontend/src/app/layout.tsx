@@ -9,8 +9,8 @@ const notoSerifSC = Noto_Serif_SC({ subsets: ["chinese-simplified"], weight: ["3
 
 export const metadata: Metadata = {
   title: {
-    default: "Quote",
-    template: "%s · Quote",
+    default: "Gleaning",
+    template: "%s · Gleaning",
   },
   description: "Capture and recall beautiful sentences",
   icons: {

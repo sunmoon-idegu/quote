@@ -25,7 +25,7 @@ export default function BookPage() {
         const token = await waitForToken(getToken);
         const data = await apiFetch<BookWithQuotes>(`/books/${bookId}`, token);
         setBook(data);
-        document.title = `${data.title} · Quote`;
+        document.title = `${data.title} · Gleaning`;
       } catch {
         setError(true);
       } finally {

@@ -13,7 +13,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => { document.title = "Feed · Quote"; }, []);
+  useEffect(() => { document.title = "Feed · Gleaning"; }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {

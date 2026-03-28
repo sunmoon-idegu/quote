@@ -40,8 +40,8 @@ export function Nav() {
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <img src="/favicon.svg" alt="Quote" width={24} height={24} className="rounded-md" />
-            <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100 tracking-tight">Quote</span>
+            <img src="/favicon.svg" alt="Gleaning" width={24} height={24} className="rounded-md" />
+            <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100 tracking-tight">Gleaning</span>
           </Link>
 
           {/* Nav links */}

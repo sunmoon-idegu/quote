@@ -82,7 +82,7 @@ export default function ShelfPage() {
     })();
   }, [getToken]);
 
-  useEffect(() => { document.title = "Shelf · Quote"; }, []);
+  useEffect(() => { document.title = "Shelf · Gleaning"; }, []);
 
   useEffect(() => {
     if (showForm) setTimeout(() => titleRef.current?.focus(), 50);
