@@ -24,7 +24,7 @@ export function FloatingAddButton() {
         onClick={() => { setPrefillBookId(""); setOpen(true); }}
         aria-label="Add quote (⌘N)"
         title="Add quote (⌘N)"
-        className="fixed bottom-6 right-6 z-50 flex h-13 w-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+        className="cursor-pointer fixed bottom-6 right-6 z-50 flex h-13 w-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
       >
         <Plus size={22} />
       </button>
