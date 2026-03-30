@@ -10,6 +10,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from auth import verify_token
+from database import check_db
 from models import User
 from routers import books, quotes, sources, tags, search
 
@@ -25,7 +26,7 @@ sentry_sdk.init(
 )
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
-app = FastAPI(title="Quote API")
+app = FastAPI(title="Gleaning API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -56,7 +57,30 @@ app.include_router(search.router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    db_status = check_db()
+    ok = db_status["status"] == "ok"
+    return JSONResponse(
+        status_code=200 if ok else 503,
+        content={"status": "ok" if ok else "degraded", "db": db_status},
+    )
+
+
+@app.get("/rate-limit-status")
+def rate_limit_status():
+    """Expose slowapi storage stats to diagnose limit exhaustion."""
+    storage = limiter._storage
+    info: dict = {"backend": type(storage).__name__}
+    try:
+        # MemoryStorage exposes _storage dict; RedisStorage exposes .storage
+        raw = getattr(storage, "_storage", None) or getattr(storage, "storage", None)
+        if raw is not None:
+            info["active_keys"] = len(raw)
+            # Show the 20 most-used keys
+            top = sorted(raw.items(), key=lambda kv: int(kv[1]), reverse=True)[:20]
+            info["top_keys"] = [{"key": k, "count": int(v)} for k, v in top]
+    except Exception as e:
+        info["error"] = str(e)
+    return info
 
 
 @app.get("/me")

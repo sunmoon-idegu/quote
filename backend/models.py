@@ -39,7 +39,7 @@ class Source(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    type = Column(Text, nullable=False)  # 'book' | 'video' | 'spoken' | 'unknown'
+    type = Column(Text, nullable=False)  # 'book' | 'video' | 'live' | 'unknown'
     title = Column(Text)
     author = Column(Text)
     url = Column(Text)

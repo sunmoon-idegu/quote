@@ -37,7 +37,7 @@ class BookWithQuotes(BookOut):
 # ── Sources ────────────────────────────────────────────────────────────────
 
 class SourceCreate(BaseModel):
-    type: str  # 'book' | 'video' | 'spoken' | 'unknown'
+    type: str  # 'book' | 'video' | 'live' | 'unknown'
     title: Optional[str] = None
     author: Optional[str] = None
     url: Optional[str] = None

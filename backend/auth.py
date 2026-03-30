@@ -45,6 +45,28 @@ def _get_jwks(force_refresh: bool = False) -> dict:
     return _jwks_cache
 
 
+def _fetch_clerk_email(clerk_id: str) -> str:
+    secret = os.environ.get("CLERK_SECRET_KEY", "")
+    try:
+        resp = httpx.get(
+            f"https://api.clerk.com/v1/users/{clerk_id}",
+            headers={"Authorization": f"Bearer {secret}"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        addresses = data.get("email_addresses", [])
+        primary_id = data.get("primary_email_address_id")
+        for addr in addresses:
+            if addr.get("id") == primary_id:
+                return addr.get("email_address", "")
+        if addresses:
+            return addresses[0].get("email_address", "")
+    except Exception:
+        pass
+    return ""
+
+
 def verify_token(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
@@ -84,7 +106,7 @@ def verify_token(
 
     user = db.query(User).filter(User.clerk_id == clerk_id).first()
     if user is None:
-        email = payload.get("email", "")
+        email = _fetch_clerk_email(clerk_id)
         user = User(clerk_id=clerk_id, email=email)
         db.add(user)
         db.commit()
