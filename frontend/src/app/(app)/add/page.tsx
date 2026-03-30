@@ -7,7 +7,7 @@ import { apiFetch, waitForToken, LANGUAGES, type Book } from "@/lib/api";
 import { Plus, X } from "lucide-react";
 import { LanguageSelect } from "@/components/language-select";
 
-type SourceType = "none" | "book" | "video" | "spoken" | "unknown";
+type SourceType = "book" | "video" | "live" | "unknown";
 
 function AddQuoteForm() {
   const { getToken } = useAuth();
@@ -22,8 +22,8 @@ function AddQuoteForm() {
   const [page, setPage] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [spokenSpeaker, setSpokenSpeaker] = useState("");
-  const [spokenContext, setSpokenContext] = useState("");
+  const [liveSpeaker, setLiveSpeaker] = useState("");
+  const [liveContext, setLiveContext] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
@@ -89,10 +89,10 @@ function AddQuoteForm() {
         body: JSON.stringify({ type: "video", title: videoTitle, url: videoUrl || null }),
       });
       sourceId = source.id;
-    } else if (sourceType === "spoken") {
+    } else if (sourceType === "live") {
       const source = await apiFetch<{ id: string }>("/sources", token, {
         method: "POST",
-        body: JSON.stringify({ type: "spoken", author: spokenSpeaker || null, context: spokenContext || null }),
+        body: JSON.stringify({ type: "live", author: liveSpeaker || null, context: liveContext || null }),
       });
       sourceId = source.id;
     } else if (sourceType === "unknown") {
@@ -148,9 +148,8 @@ function AddQuoteForm() {
   const sourceTypes: { value: SourceType; label: string }[] = [
     { value: "book", label: "Book" },
     { value: "video", label: "Video" },
-    { value: "spoken", label: "Spoken" },
+    { value: "live", label: "Live" },
     { value: "unknown", label: "Unknown" },
-    { value: "none", label: "None" },
   ];
 
   // When arriving from a book page, skip source selection entirely
@@ -249,13 +248,17 @@ function AddQuoteForm() {
                   autoFocus
                   className="w-full bg-transparent text-sm placeholder:text-neutral-400 focus:outline-none border-b border-neutral-100 dark:border-neutral-800 pb-2"
                 />
-                <input
-                  value={newBookAuthor}
-                  onChange={(e) => setNewBookAuthor(e.target.value)}
-                  placeholder="Author (optional)"
-                  className="w-full bg-transparent text-sm placeholder:text-neutral-400 focus:outline-none border-b border-neutral-100 dark:border-neutral-800 pb-2"
-                />
-                <LanguageSelect value={newBookLanguage} onValueChange={setNewBookLanguage} />
+                <div className="flex gap-2">
+                  <input
+                    value={newBookAuthor}
+                    onChange={(e) => setNewBookAuthor(e.target.value)}
+                    placeholder="Author (optional)"
+                    className="w-3/5 bg-transparent text-sm placeholder:text-neutral-400 focus:outline-none border-b border-neutral-100 dark:border-neutral-800 pb-2"
+                  />
+                  <div className="w-2/5">
+                    <LanguageSelect value={newBookLanguage} onValueChange={setNewBookLanguage} />
+                  </div>
+                </div>
                 <div className="flex gap-2 pt-1">
                   <button type="button" onClick={handleCreateBook} className="text-xs bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 px-3 py-1 rounded">
                     Add book
@@ -283,7 +286,7 @@ function AddQuoteForm() {
             <input
               value={videoTitle}
               onChange={(e) => setVideoTitle(e.target.value)}
-              placeholder="Video title"
+              placeholder="Author (optional)"
               className="w-full bg-transparent border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400"
             />
             <input
@@ -296,18 +299,18 @@ function AddQuoteForm() {
           </div>
         )}
 
-        {/* Spoken source */}
-        {sourceType === "spoken" && (
+        {/* Live source */}
+        {sourceType === "live" && (
           <div className="space-y-2">
             <input
-              value={spokenSpeaker}
-              onChange={(e) => setSpokenSpeaker(e.target.value)}
+              value={liveSpeaker}
+              onChange={(e) => setLiveSpeaker(e.target.value)}
               placeholder="Speaker (optional)"
               className="w-full bg-transparent border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400"
             />
             <input
-              value={spokenContext}
-              onChange={(e) => setSpokenContext(e.target.value)}
+              value={liveContext}
+              onChange={(e) => setLiveContext(e.target.value)}
               placeholder="Context (optional)"
               className="w-full bg-transparent border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400"
             />
@@ -315,7 +318,7 @@ function AddQuoteForm() {
         )}
 
         {/* Author (when no source or unknown) */}
-        {(sourceType === "none" || sourceType === "unknown") && (
+        {sourceType === "unknown" && (
           <input
             value={author}
             onChange={(e) => setAuthor(e.target.value)}

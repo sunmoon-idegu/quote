@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LanguageSelect } from "@/components/language-select";
 
-type SourceType = "none" | "book" | "video" | "spoken" | "unknown";
+type SourceType = "book" | "video" | "live" | "unknown";
 
 interface AddQuoteModalProps {
   open: boolean;
@@ -34,8 +34,8 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
   const [page, setPage] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [spokenSpeaker, setSpokenSpeaker] = useState("");
-  const [spokenContext, setSpokenContext] = useState("");
+  const [liveSpeaker, setLiveSpeaker] = useState("");
+  const [liveContext, setLiveContext] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
@@ -53,7 +53,7 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
     if (!open) return;
     setText(""); setAuthor(""); setPage("");
     setVideoTitle(""); setVideoUrl("");
-    setSpokenSpeaker(""); setSpokenContext("");
+    setLiveSpeaker(""); setLiveContext("");
     setTagInput(""); setTags([]);
     setShowNewBook(false);
     setNewBookTitle(""); setNewBookAuthor(""); setNewBookLanguage("");
@@ -125,10 +125,10 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
         body: JSON.stringify({ type: "video", title: videoTitle, url: videoUrl || null }),
       });
       sourceId = src.id;
-    } else if (sourceType === "spoken") {
+    } else if (sourceType === "live") {
       const src = await apiFetch<{ id: string }>("/sources", token, {
         method: "POST",
-        body: JSON.stringify({ type: "spoken", author: spokenSpeaker || null, context: spokenContext || null }),
+        body: JSON.stringify({ type: "live", author: liveSpeaker || null, context: liveContext || null }),
       });
       sourceId = src.id;
     } else if (sourceType === "unknown") {
@@ -168,9 +168,8 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
   const sourceTypes: { value: SourceType; label: string }[] = [
     { value: "book", label: "Book" },
     { value: "video", label: "Video" },
-    { value: "spoken", label: "Spoken" },
+    { value: "live", label: "Live" },
     { value: "unknown", label: "Unknown" },
-    { value: "none", label: "None" },
   ];
 
   return (
@@ -263,8 +262,8 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
                 <div className="border border-border rounded-lg p-3 space-y-2">
                   <Input value={newBookTitle} onChange={(e) => setNewBookTitle(e.target.value)} placeholder="Book title" autoFocus />
                   <div className="flex gap-2">
-                    <Input value={newBookAuthor} onChange={(e) => setNewBookAuthor(e.target.value)} placeholder="Author (optional)" className="flex-1" />
-                    <div className="w-36 shrink-0">
+                    <Input value={newBookAuthor} onChange={(e) => setNewBookAuthor(e.target.value)} placeholder="Author (optional)" className="w-3/5" />
+                    <div className="w-2/5">
                       <LanguageSelect value={newBookLanguage} onValueChange={setNewBookLanguage} />
                     </div>
                   </div>
@@ -287,16 +286,16 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
             </div>
           )}
 
-          {/* Spoken */}
-          {sourceType === "spoken" && (
+          {/* Live */}
+          {sourceType === "live" && (
             <div className="flex gap-2">
-              <Input value={spokenSpeaker} onChange={(e) => setSpokenSpeaker(e.target.value)} placeholder="Speaker (optional)" className="flex-1" />
-              <Input value={spokenContext} onChange={(e) => setSpokenContext(e.target.value)} placeholder="Context (optional)" className="flex-1" />
+              <Input value={liveSpeaker} onChange={(e) => setLiveSpeaker(e.target.value)} placeholder="Speaker (optional)" className="flex-1" />
+              <Input value={liveContext} onChange={(e) => setLiveContext(e.target.value)} placeholder="Context (optional)" className="flex-1" />
             </div>
           )}
 
           {/* Author */}
-          {(sourceType === "none" || sourceType === "unknown") && (
+          {sourceType === "unknown" && (
             <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author (optional)" />
           )}
 
@@ -324,7 +323,7 @@ export function AddQuoteModal({ open, prefillBookId = "", onClose, onAdded }: Ad
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="items-center">
           <p className="text-xs text-muted-foreground mr-auto">⌘↵ to save</p>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={!text.trim() || submitting}>

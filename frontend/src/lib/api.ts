@@ -55,7 +55,7 @@ export const LANGUAGES = [
 
 export interface Source {
   id: string;
-  type: "book" | "video" | "spoken" | "unknown";
+  type: "book" | "video" | "live" | "unknown";
   title: string | null;
   author: string | null;
   url: string | null;

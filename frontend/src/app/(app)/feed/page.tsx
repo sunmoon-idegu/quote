@@ -74,7 +74,7 @@ export default function FeedPage() {
   if (quotes.length === 0) {
     return (
       <div className="text-center py-32 text-neutral-400">
-        <p className="text-sm">No quotes yet. Press ⌘N to add one.</p>
+        <p className="text-sm">No quotes yet. Press ⌘E to add one.</p>
       </div>
     );
   }
@@ -97,8 +97,15 @@ export default function FeedPage() {
           />
         </div>
 
-        {/* Counter + arrow — anchored to right of card */}
-        <div className="absolute top-1/2 -translate-y-1/2 -right-16 flex flex-col items-center gap-2">
+        {/* Counter + arrow — bottom on mobile, right on md+ */}
+        <div className="
+          flex items-center gap-2
+          absolute -bottom-10 left-1/2 -translate-x-1/2 flex-row
+          md:flex-col md:top-1/2 md:-translate-y-1/2 md:-right-16 md:bottom-auto md:left-auto md:translate-x-0
+        ">
+          <span className="text-xs text-muted-foreground/50 tabular-nums md:order-last">
+            {index + 1}/{quotes.length}
+          </span>
           <button
             onClick={() => setIndex((i) => (i + 1) % quotes.length)}
             className="cursor-pointer p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -106,9 +113,6 @@ export default function FeedPage() {
           >
             <ChevronRight size={18} />
           </button>
-          <span className="text-xs text-muted-foreground/50 tabular-nums">
-            {index + 1}/{quotes.length}
-          </span>
         </div>
       </div>
     </div>

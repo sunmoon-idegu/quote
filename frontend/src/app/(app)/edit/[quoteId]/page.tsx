@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LanguageSelect } from "@/components/language-select";
 
-type SourceType = "none" | "book" | "video" | "spoken" | "unknown";
+type SourceType = "book" | "video" | "live" | "unknown";
 
 export default function EditQuotePage() {
   const { quoteId } = useParams<{ quoteId: string }>();
@@ -20,13 +20,13 @@ export default function EditQuotePage() {
 
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
-  const [sourceType, setSourceType] = useState<SourceType>("none");
+  const [sourceType, setSourceType] = useState<SourceType>("unknown");
   const [author, setAuthor] = useState("");
   const [page, setPage] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [spokenSpeaker, setSpokenSpeaker] = useState("");
-  const [spokenContext, setSpokenContext] = useState("");
+  const [liveSpeaker, setLiveSpeaker] = useState("");
+  const [liveContext, setLiveContext] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
@@ -66,9 +66,9 @@ export default function EditQuotePage() {
         } else if (s.type === "video") {
           setVideoTitle(s.title ?? "");
           setVideoUrl(s.url ?? "");
-        } else if (s.type === "spoken") {
-          setSpokenSpeaker(s.author ?? "");
-          setSpokenContext(s.context ?? "");
+        } else if (s.type === "live") {
+          setLiveSpeaker(s.author ?? "");
+          setLiveContext(s.context ?? "");
         }
       }
 
@@ -117,10 +117,10 @@ export default function EditQuotePage() {
         body: JSON.stringify({ type: "video", title: videoTitle, url: videoUrl || null }),
       });
       sourceId = source.id;
-    } else if (sourceType === "spoken") {
+    } else if (sourceType === "live") {
       const source = await apiFetch<{ id: string }>("/sources", token, {
         method: "POST",
-        body: JSON.stringify({ type: "spoken", author: spokenSpeaker || null, context: spokenContext || null }),
+        body: JSON.stringify({ type: "live", author: liveSpeaker || null, context: liveContext || null }),
       });
       sourceId = source.id;
     } else if (sourceType === "unknown") {
@@ -129,8 +129,6 @@ export default function EditQuotePage() {
         body: JSON.stringify({ type: "unknown" }),
       });
       sourceId = source.id;
-    } else if (sourceType === "none") {
-      sourceId = null;
     }
 
     const tagIds: string[] = [];
@@ -176,9 +174,8 @@ export default function EditQuotePage() {
   const sourceTypes: { value: SourceType; label: string }[] = [
     { value: "book", label: "Book" },
     { value: "video", label: "Video" },
-    { value: "spoken", label: "Spoken" },
+    { value: "live", label: "Live" },
     { value: "unknown", label: "Unknown" },
-    { value: "none", label: "None" },
   ];
 
   if (loading) return <div className="py-12 text-sm text-neutral-400 animate-pulse">Loading…</div>;
@@ -277,14 +274,14 @@ export default function EditQuotePage() {
           </div>
         )}
 
-        {sourceType === "spoken" && (
+        {sourceType === "live" && (
           <div className="space-y-2">
-            <Input value={spokenSpeaker} onChange={(e) => setSpokenSpeaker(e.target.value)} placeholder="Speaker (optional)" />
-            <Input value={spokenContext} onChange={(e) => setSpokenContext(e.target.value)} placeholder="Context (optional)" />
+            <Input value={liveSpeaker} onChange={(e) => setLiveSpeaker(e.target.value)} placeholder="Speaker (optional)" />
+            <Input value={liveContext} onChange={(e) => setLiveContext(e.target.value)} placeholder="Context (optional)" />
           </div>
         )}
 
-        {(sourceType === "none" || sourceType === "unknown") && (
+        {sourceType === "unknown" && (
           <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author (optional)" />
         )}
 

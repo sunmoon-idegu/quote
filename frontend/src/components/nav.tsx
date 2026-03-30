@@ -26,7 +26,7 @@ export function Nav() {
         e.preventDefault();
         setSearchOpen(true);
       }
-      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
+      if ((e.metaKey || e.ctrlKey) && e.key === "e") {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent("open-add-quote"));
       }

@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 const sourceIcons = {
   book: BookOpen,
   video: Video,
-  spoken: Mic,
+  live: Mic,
   unknown: null,
 };
 
@@ -33,6 +33,12 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
   const { getToken } = useAuth();
 
   const isChinese = /[\u4e00-\u9fff]/.test(quote.text);
+  const len = quote.text.length;
+  const sizeClass =
+    len < 100 ? "text-xl sm:text-2xl md:text-3xl" :
+    len < 250 ? "text-lg sm:text-xl md:text-2xl" :
+    len < 500 ? "text-base sm:text-lg md:text-xl" :
+                "text-sm sm:text-base md:text-lg";
   const s = quote.source;
   const SourceIcon = s ? sourceIcons[s.type] : null;
   const title = s?.title ?? s?.book?.title ?? null;
@@ -125,7 +131,7 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
       </div>
 
       {/* Quote text */}
-      <blockquote className={`text-xl sm:text-2xl md:text-3xl leading-relaxed whitespace-pre-wrap text-foreground font-[350] ${isChinese ? "font-[family-name:var(--font-noto-serif-sc)]" : "font-[family-name:var(--font-geist-sans)]"}`}>
+      <blockquote className={`${sizeClass} leading-relaxed whitespace-pre-wrap text-foreground font-[350] ${isChinese ? "font-[family-name:var(--font-noto-serif-sc)]" : "font-[family-name:var(--font-geist-sans)]"}`}>
         {quote.text}
       </blockquote>
 
@@ -135,10 +141,9 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             {SourceIcon && <SourceIcon size={12} className="shrink-0" />}
             {title && <span>{title}</span>}
-            {title && author && <span className="text-muted-foreground/40">·</span>}
-            {author && <span>{author}</span>}
-            {page && <span className="text-muted-foreground/40">·</span>}
             {page && <span>{page}</span>}
+            {title && author && <span className="text-muted-foreground/40">·</span>}
+            {author && <span>{author}</span>}            
           </span>
         )}
         {quote.tags.map((t) => (
@@ -207,7 +212,7 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="items-center">
             <p className="text-xs text-muted-foreground mr-auto">⌘↵ to save</p>
             <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
             <Button onClick={handleEditSubmit} disabled={!text.trim() || submitting}>

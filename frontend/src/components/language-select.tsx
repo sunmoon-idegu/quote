@@ -26,7 +26,7 @@ export function LanguageSelect({
   return (
     <Select value={value} onValueChange={(v) => onValueChange(v ?? "")}>
       <SelectTrigger className={className ?? "w-full"}>
-        <span className={`flex flex-1 text-left text-sm ${!label ? "text-muted-foreground" : ""}`}>
+        <span className={`flex flex-1 min-w-0 overflow-hidden text-left text-sm ${!label ? "text-muted-foreground" : ""}`}>
           {label ?? placeholder}
         </span>
       </SelectTrigger>
