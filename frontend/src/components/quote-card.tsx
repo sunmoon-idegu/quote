@@ -25,11 +25,12 @@ const sourceIcons = {
 
 interface QuoteCardProps {
   quote: Quote;
+  hideDate?: boolean;
   onDeleted?: (id: string) => void;
   onUpdated?: (quote: Quote) => void;
 }
 
-export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
+export function QuoteCard({ quote, hideDate, onDeleted, onUpdated }: QuoteCardProps) {
   const { getToken } = useAuth();
 
   const isChinese = /[\u4e00-\u9fff]/.test(quote.text);
@@ -151,9 +152,11 @@ export function QuoteCard({ quote, onDeleted, onUpdated }: QuoteCardProps) {
             {t.name}
           </span>
         ))}
-        <span className="text-xs text-muted-foreground/50 ml-auto">
-          {new Date(quote.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-        </span>
+        {!hideDate && (
+          <span className="text-xs text-muted-foreground/50 ml-auto">
+            {new Date(quote.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+        )}
       </footer>
 
       {/* ── Delete confirm dialog ── */}

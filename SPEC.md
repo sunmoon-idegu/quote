@@ -1,4 +1,4 @@
-# Quote Collector — Spec
+# Gleaning — Spec
 
 ## Purpose
 
@@ -21,62 +21,87 @@ All data is user-scoped from day one so Phase 2 requires no data model changes.
 ### Source
 Where a quote came from. A source is optional — sometimes you don't know or don't care.
 
-| Source Type | Fields                              | Example                          |
-|-------------|-------------------------------------|----------------------------------|
-| `book`      | title, author (optional), page (optional) | *Meditations*, Marcus Aurelius, p.42 |
-| `video`     | title, author/speaker (optional), url (optional) | YouTube talk, interview          |
-| `spoken`    | author/speaker (optional), context (optional) | Heard at a talk, conversation    |
-| `unknown`   | —                                   | No idea where it came from       |
+| Source Type | Fields                                          | Example                       |
+|-------------|-------------------------------------------------|-------------------------------|
+| `book`      | title, author (optional), page (optional)       | *Meditations*, Marcus Aurelius, p.42 |
+| `video`     | title, author/speaker (optional), url (optional)| YouTube talk, interview       |
+| `live`      | author/speaker (optional), context (optional)   | Heard at a talk, conversation |
+| `unknown`   | —                                               | No idea where it came from    |
 
 Books are the primary source type and get first-class treatment (dedicated shelf view).
+
+### Book
+A book has its own record separate from a source, enabling the shelf view and quote grouping.
+
+| Field      | Type   | Required | Notes                          |
+|------------|--------|----------|--------------------------------|
+| title      | string | yes      |                                |
+| author     | string | no       |                                |
+| language   | enum   | no       | `en` or `zh`                   |
+| cover_url  | string | no       | URL to a cover image           |
 
 ### Quote
 A sentence or paragraph worth keeping.
 
-| Field      | Type       | Required | Notes                                    |
-|------------|------------|----------|------------------------------------------|
-| text       | string     | yes      | The quote itself                         |
-| source     | Source     | no       | Where it came from (any type above)      |
-| author     | string     | no       | Who said/wrote it (if not via a source)  |
-| created_at | date       | auto     | When it was entered                      |
-| tags       | string[]   | no       | Optional labels, e.g. "grief", "time"    |
+| Field      | Type     | Required | Notes                                    |
+|------------|----------|----------|------------------------------------------|
+| text       | string   | yes      | The quote itself                         |
+| source     | Source   | no       | Where it came from (any type above)      |
+| author     | string   | no       | Who said/wrote it (if not via a source)  |
+| page       | integer  | no       | Page number (books only)                 |
+| tags       | string[] | no       | Optional labels, e.g. "grief", "time"    |
+| created_at | date     | auto     | When it was entered                      |
 
 ---
 
 ## Features
 
-### 1. Source Management
-- Add a new book (title, optional author)
-- View bookshelf — grid or list of all books
-- Tap a book → see all quotes from that book, sorted by page number
-
-### 2. Quote Entry (primary action — must be fast)
+### 1. Quote Entry (primary action — must be fast)
 - **Text** is the only required field — everything else is optional
 - Optionally attach a source:
-  - Book: searchable dropdown of existing books + page number field
-  - Video: title + optional URL
-  - Spoken: speaker + optional context note
-  - Unknown: no fields
-- Optionally add author (if no source, or source has no author)
-- Optionally add tags
-- Submit with keyboard shortcut (no mouse required)
+  - **Book:** searchable dropdown of existing books + page number field; can create a new book inline (title, optional author, optional language)
+  - **Video:** title + optional URL
+  - **Live:** speaker + optional context note
+  - **Unknown:** no fields
+- Optionally add tags (comma or Enter to add, Backspace to remove)
+- Submit with ⌘↵ (no mouse required)
+- Global shortcut **⌘E** opens the add-quote modal from anywhere in the app
 
-### 3. Browse by Book
-- Bookshelf view: all books with quote counts
+### 2. Quote Feed
+- One quote at a time, centered on screen
+- **Space** or the arrow button advances to the next quote
+- Quotes cycle through in chronological order (most recent first)
+- **Display mode** — hides the nav and add button for a distraction-free reading experience:
+  - Desktop: press **F** to toggle, **Esc** to exit
+  - Mobile: **double-tap** the quote card to toggle
+- Newly added quotes appear instantly without a page reload
+
+### 3. Shelf (Browse by Book)
+- Grid of all books with cover images (if available) and quote counts
 - Tap a book → quotes sorted by page number
+- Quotes added from within a book's page are pre-linked to that book
 
 ### 4. Keyword Search
-- Single search bar, always accessible
+- Single search bar, always accessible via **⌘K**
 - Searches across: quote text, source title, author, tags
-- Results show: quote excerpt + source + author
+- Results show quote excerpt + source + author
 
-### 5. Quote Feed
-- A chronological list of all quotes (most recent first)
-- Quick way to browse recent additions
+### 5. Source & Tag Management
+- Sources are created inline during quote entry
+- Tags are free-form strings, created on the fly
 
-### 5. Quote Feed
-- A chronological list of all quotes (most recent first)
-- Quick way to browse recent additions
+---
+
+## Keyboard Shortcuts
+
+| Shortcut | Action                        |
+|----------|-------------------------------|
+| ⌘E       | Open add-quote modal          |
+| ⌘K       | Open search                   |
+| Space    | Next quote (feed)             |
+| F        | Toggle display mode (feed)    |
+| Esc      | Exit display mode / close modal |
+| ⌘↵       | Submit form                   |
 
 ---
 
@@ -97,20 +122,21 @@ A sentence or paragraph worth keeping.
 
 1. **Speed of entry is the most important thing.** If adding a quote takes more than 5 seconds, the user won't do it mid-reading.
 2. **Minimal required fields.** Only the quote text is required. Everything else is optional.
-3. **Keyboard-first.** Tab between fields, Enter to submit.
+3. **Keyboard-first.** Tab between fields, ⌘↵ to submit, shortcuts for everything common.
 4. **No clutter.** This is a reading companion, not a productivity app. Keep it calm and focused.
 
 ---
 
 ## Tech Stack
 
-| Layer | Choice | Notes |
-|---|---|---|
-| **Frontend** | Next.js (React) | Web first, mobile later |
-| **Backend** | FastAPI (Python) | REST API, business logic |
-| **Database** | PostgreSQL via Neon | Serverless PostgreSQL, free tier never pauses |
-| **Auth** | Clerk | Google OAuth, Python SDK, 50K users free |
-| **Hosting** | Vercel (frontend) + Railway (backend) | Simple deploys, generous free tiers |
+| Layer        | Choice                          | Notes                                          |
+|--------------|---------------------------------|------------------------------------------------|
+| **Frontend** | Next.js (React)                 | Web first, mobile later                        |
+| **Backend**  | FastAPI (Python)                | REST API, business logic                       |
+| **Database** | PostgreSQL                      | Hosted on Railway                              |
+| **Auth**     | Clerk                           | Google OAuth, JWT verification via JWKS        |
+| **Hosting**  | Vercel (frontend) + Railway (backend) | Simple deploys                           |
+| **Monitoring** | Sentry                        | Error tracking; `/health` endpoint probes DB   |
 
 ---
 

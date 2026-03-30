@@ -18,6 +18,13 @@ const links = [
 export function Nav() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => setHidden((e as CustomEvent<boolean>).detail);
+    window.addEventListener("gleaning:display-mode", handler);
+    return () => window.removeEventListener("gleaning:display-mode", handler);
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -34,6 +41,8 @@ export function Nav() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  if (hidden) return null;
 
   return (
     <>

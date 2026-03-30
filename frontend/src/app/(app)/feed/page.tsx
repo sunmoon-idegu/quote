@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch, waitForToken, type Quote } from "@/lib/api";
 import { QuoteCard } from "@/components/quote-card";
 import { ChevronRight } from "lucide-react";
+
+function setDisplayMode(active: boolean) {
+  window.dispatchEvent(new CustomEvent("gleaning:display-mode", { detail: active }));
+}
 
 export default function FeedPage() {
   const { getToken } = useAuth();
@@ -12,8 +16,28 @@ export default function FeedPage() {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [displayMode, setDisplayModeState] = useState(false);
+  const lastTapRef = useRef(0);
+
+  function handleDoubleTap() {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      setDisplayModeState((prev) => !prev);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
+  }
 
   useEffect(() => { document.title = "Feed · Gleaning"; }, []);
+
+  // Sync display mode state to nav/button via custom event
+  useEffect(() => {
+    setDisplayMode(displayMode);
+  }, [displayMode]);
+
+  // Clean up display mode when leaving the page
+  useEffect(() => () => setDisplayMode(false), []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -45,6 +69,12 @@ export default function FeedPage() {
       if (e.key === " ") {
         e.preventDefault();
         setIndex((i) => (i + 1) % quotes.length);
+      }
+      if (e.key === "f" || e.key === "F") {
+        setDisplayModeState((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setDisplayModeState(false);
       }
     };
     window.addEventListener("keydown", handler);
@@ -82,12 +112,13 @@ export default function FeedPage() {
   const quote = quotes[index];
 
   return (
-    <div className="-my-8 h-[calc(100vh-56px)] flex items-center justify-center px-4">
-      {/* Card + right arrow */}
+    <div className={`flex items-center justify-center px-4 transition-all duration-300 ${displayMode ? "fixed inset-0 bg-background z-30" : "-my-8 h-[calc(100vh-56px)]"}`}>
+      {/* Card + navigation */}
       <div className="relative w-full max-w-3xl">
-        <div key={index} className="relative rounded-2xl border border-transparent px-10 py-12 animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
+        <div key={index} onTouchEnd={handleDoubleTap} className="relative rounded-2xl border border-transparent px-10 py-12 animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
           <QuoteCard
             quote={quote}
+            hideDate={displayMode}
             onDeleted={(id) => {
               const next = quotes.filter((x) => x.id !== id);
               setQuotes(next);
@@ -97,23 +128,25 @@ export default function FeedPage() {
           />
         </div>
 
-        {/* Counter + arrow — bottom on mobile, right on md+ */}
-        <div className="
-          flex items-center gap-2
-          absolute -bottom-10 left-1/2 -translate-x-1/2 flex-row
-          md:flex-col md:top-1/2 md:-translate-y-1/2 md:-right-16 md:bottom-auto md:left-auto md:translate-x-0
-        ">
-          <span className="text-xs text-muted-foreground/50 tabular-nums md:order-last">
-            {index + 1}/{quotes.length}
-          </span>
-          <button
-            onClick={() => setIndex((i) => (i + 1) % quotes.length)}
-            className="cursor-pointer p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            title="Next (Space)"
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
+        {/* Counter + arrow — hidden in display mode */}
+        {!displayMode && (
+          <div className="
+            flex items-center gap-2
+            absolute -bottom-10 left-1/2 -translate-x-1/2 flex-row
+            md:flex-col md:top-1/2 md:-translate-y-1/2 md:-right-16 md:bottom-auto md:left-auto md:translate-x-0
+          ">
+            <span className="text-xs text-muted-foreground/50 tabular-nums md:order-last">
+              {index + 1}/{quotes.length}
+            </span>
+            <button
+              onClick={() => setIndex((i) => (i + 1) % quotes.length)}
+              className="cursor-pointer p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Next (Space)"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

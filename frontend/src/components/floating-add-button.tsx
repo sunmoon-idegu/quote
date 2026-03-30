@@ -7,6 +7,13 @@ import { AddQuoteModal } from "./add-quote-modal";
 export function FloatingAddButton() {
   const [open, setOpen] = useState(false);
   const [prefillBookId, setPrefillBookId] = useState("");
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => setHidden((e as CustomEvent<boolean>).detail);
+    window.addEventListener("gleaning:display-mode", handler);
+    return () => window.removeEventListener("gleaning:display-mode", handler);
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -17,6 +24,8 @@ export function FloatingAddButton() {
     window.addEventListener("open-add-quote", handler);
     return () => window.removeEventListener("open-add-quote", handler);
   }, []);
+
+  if (hidden) return null;
 
   return (
     <>
