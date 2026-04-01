@@ -1,4 +1,4 @@
-# Quote Collector — Frontend
+# Gleaning — Frontend
 
 Next.js web app for the Quote Collector project.
 

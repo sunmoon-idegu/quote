@@ -1,13 +1,13 @@
-# Quote Collector
+# Gleaning
 
-A personal app to capture and revisit quotes from books, videos, and conversations.
+A personal app to save and revisit the quotes that stay with you — from books, videos, talks, and conversations.
 
-Quotes are organized by source and tagged for browsing. A full-text search lets you find anything across your collection.
+Quotes live on a scrollable feed and are organised by source on the Shelf. Full-text search lets you find anything across your collection. Press `F` on the feed to enter full display mode, or `⌘E` anywhere to quick-add a quote.
 
 ## Structure
 
 ```
-quote/
+gleaning/
 ├── frontend/   # Next.js web app
 └── backend/    # FastAPI REST API
 ```
