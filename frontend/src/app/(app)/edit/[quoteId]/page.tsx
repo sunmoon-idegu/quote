@@ -14,7 +14,7 @@ type SourceType = "book" | "video" | "live" | "unknown";
 
 export default function EditQuotePage() {
   const { quoteId } = useParams<{ quoteId: string }>();
-  const { getToken } = useAuth();
+  const { getToken, isLoaded } = useAuth();
   const router = useRouter();
   const textRef = useRef<HTMLTextAreaElement>(null);
 
@@ -40,9 +40,10 @@ export default function EditQuotePage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!isLoaded) return;
     (async () => {
-      const token = await waitForToken(getToken);
-      
+      const token = await getToken();
+      if (!token) return;
       const [quote, booksData] = await Promise.all([
         apiFetch<Quote>(`/quotes/${quoteId}`, token),
         apiFetch<Book[]>("/books", token),
@@ -75,7 +76,7 @@ export default function EditQuotePage() {
       setLoading(false);
       setTimeout(() => textRef.current?.focus(), 50);
     })();
-  }, [getToken, quoteId]);
+  }, [getToken, isLoaded, quoteId]);
 
   const filteredBooks = books.filter((b) =>
     b.title.toLowerCase().includes(bookSearch.toLowerCase())

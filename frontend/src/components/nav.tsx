@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Search, BookOpen, List } from "lucide-react";
+import { Search, BookOpen, List, HelpCircle } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "./theme-toggle";
 import { SearchModal } from "./search-modal";
@@ -85,7 +85,15 @@ export function Nav() {
             </Button>
             <ThemeToggle />
             <div className="ml-2 flex items-center">
-              <UserButton />
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Help"
+                    href="/help"
+                    labelIcon={<HelpCircle size={16} />}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
           </div>
         </div>

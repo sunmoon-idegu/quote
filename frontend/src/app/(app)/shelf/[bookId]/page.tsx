@@ -14,15 +14,17 @@ function openAddQuote(bookId: string) {
 
 export default function BookPage() {
   const { bookId } = useParams<{ bookId: string }>();
-  const { getToken } = useAuth();
+  const { getToken, isLoaded } = useAuth();
   const [book, setBook] = useState<BookWithQuotes | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!isLoaded) return;
     (async () => {
       try {
-        const token = await waitForToken(getToken);
+        const token = await getToken();
+        if (!token) return;
         const data = await apiFetch<BookWithQuotes>(`/books/${bookId}`, token);
         setBook(data);
         document.title = `${data.title} · Gleaning`;
@@ -32,7 +34,7 @@ export default function BookPage() {
         setLoading(false);
       }
     })();
-  }, [getToken, bookId]);
+  }, [getToken, isLoaded, bookId]);
 
   useEffect(() => {
     const handler = (e: Event) => {

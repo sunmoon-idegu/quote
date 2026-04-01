@@ -43,7 +43,7 @@ function groupByLanguage(books: Book[]): [string, Book[]][] {
 }
 
 export default function ShelfPage() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -69,9 +69,11 @@ export default function ShelfPage() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    if (!isLoaded) return;
     (async () => {
       try {
-        const token = await waitForToken(getToken);
+        const token = await getToken();
+        if (!token) return;
         const data = await apiFetch<Book[]>("/books", token);
         setBooks([...data].sort((a, b) => a.title.localeCompare(b.title)));
       } catch {
@@ -80,7 +82,7 @@ export default function ShelfPage() {
         setLoading(false);
       }
     })();
-  }, [getToken]);
+  }, [getToken, isLoaded]);
 
   useEffect(() => { document.title = "Shelf · Gleaning"; }, []);
 

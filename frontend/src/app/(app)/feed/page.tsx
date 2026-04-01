@@ -11,7 +11,7 @@ function setDisplayMode(active: boolean) {
 }
 
 export default function FeedPage() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded } = useAuth();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -50,9 +50,11 @@ export default function FeedPage() {
   }, []);
 
   useEffect(() => {
+    if (!isLoaded) return;
     (async () => {
       try {
-        const token = await waitForToken(getToken);
+        const token = await getToken();
+        if (!token) return;
         const data = await apiFetch<Quote[]>("/quotes", token);
         setQuotes(data);
       } catch {
@@ -61,7 +63,7 @@ export default function FeedPage() {
         setLoading(false);
       }
     })();
-  }, [getToken]);
+  }, [getToken, isLoaded]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

@@ -9,21 +9,21 @@ import { QuoteCard } from "@/components/quote-card";
 function SearchResults() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
-  const { getToken } = useAuth();
+  const { getToken, isLoaded } = useAuth();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!q) return;
+    if (!q || !isLoaded) return;
     setLoading(true);
     (async () => {
-      const token = await waitForToken(getToken);
-      
+      const token = await getToken();
+      if (!token) return;
       const data = await apiFetch<{ quotes: Quote[] }>(`/search?q=${encodeURIComponent(q)}`, token);
       setQuotes(data.quotes);
       setLoading(false);
     })();
-  }, [q, getToken]);
+  }, [q, getToken, isLoaded]);
 
   return (
     <div>
